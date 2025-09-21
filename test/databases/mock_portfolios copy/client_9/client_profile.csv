@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-9,Paul,Smith,410-96-3886,"08056 White Meadow
-Sherriport, VI 10464",77446,Self-Employed,850,35665,0,0,-0.76
+version https://git-lfs.github.com/spec/v1
+oid sha256:89871cd0ff0608162b63a3fb376697710489278de2cad83b51d2bf714d263114
+size 275

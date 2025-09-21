@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-15,Steven,White,488-51-5915,"45763 Rose Walk Apt. 180
-New Kimberlyland, NE 70828",110669,Self-Employed,811,10146,0,0,-0.62
+version https://git-lfs.github.com/spec/v1
+oid sha256:a38b1674acb640901cb3b41170a82e8ca1c5f297c1bbf67f1b72ed29bc9bfe5d
+size 291

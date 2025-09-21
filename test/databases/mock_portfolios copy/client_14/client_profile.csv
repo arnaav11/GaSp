@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-14,Olivia,Barber,787-15-3438,"4070 Cox Plains
-North Danielfurt, DC 44923",86497,Self-Employed,745,26287,0,0,0.25
+version https://git-lfs.github.com/spec/v1
+oid sha256:e2f5837c7e981e1e27d766f9dcac9d589a6e520752ccb5504f3c37127f86cbec
+size 281

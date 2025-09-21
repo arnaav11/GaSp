@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-1,Ruben,Black,594-17-3216,"82959 Chaney Islands
-Port Jamie, PR 70372",100195,Self-Employed,825,20099,2252,1291,0.49
+version https://git-lfs.github.com/spec/v1
+oid sha256:db98bd43bff8f87ea0029fd158357d33d68e43c86bcb40fa983c8440328fb4fc
+size 284

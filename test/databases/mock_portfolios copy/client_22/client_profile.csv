@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-22,Robert,Hurst,395-67-7319,"Unit 2879 Box 3771
-DPO AE 30710",75909,Self-Employed,601,41123,10252,0,0.61
+version https://git-lfs.github.com/spec/v1
+oid sha256:092fdea84f9787b5af299981decac12fb3889854b066d6c69213694511ed861f
+size 273

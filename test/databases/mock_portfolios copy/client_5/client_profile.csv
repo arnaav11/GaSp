@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-5,Ryan,Williams,193-01-1106,"Unit 6539 Box 0734
-DPO AP 75880",83465,Self-Employed,655,32363,0,0,0.2
+version https://git-lfs.github.com/spec/v1
+oid sha256:35dfc4bbf1be621fa97aab86cbec8024da31b78279d42eb89b48b335977572fb
+size 268
