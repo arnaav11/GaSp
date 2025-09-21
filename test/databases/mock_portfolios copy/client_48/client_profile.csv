@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+48,Elizabeth,Jones,882-50-7317,"PSC 7735, Box 9141
+APO AA 45405",124786,Employed,719,35396,33730,0,0.26

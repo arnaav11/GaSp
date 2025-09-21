@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+43,Lynn,Ryan,342-09-8869,"67662 Patrick Fort
+Valdezhaven, CO 04467",183228,Self-Employed,715,24150,0,0,0.75

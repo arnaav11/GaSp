@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+33,Sarah,Cain,479-65-5015,"Unit 3914 Box 3877
+DPO AE 51050",169929,Employed,660,7936,0,0,-0.26

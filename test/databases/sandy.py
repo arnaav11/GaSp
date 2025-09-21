@@ -6,6 +6,6 @@ import os
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout  
-df=pd.read_csv('databases/LC_loans_granting_model_dataset.csv')
-df=pd.read_csv('databases/train_lending_club.csv')
-df=pd.read_csv('test/databases/sentiment_analysis_gasp.csv')
+loans_df=pd.read_csv('databases/LC_loans_granting_model_dataset.csv')
+train_df=pd.read_csv('databases/train_lending_club.csv')
+sentiment_df=pd.read_csv('databases/sentiment_analysis_gasp.csv')

@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+46,Hannah,Simpson,862-57-6591,"993 Sloan Glens Apt. 280
+Allenchester, NH 78740",88876,Employed,607,13215,0,1820,0.47

@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+31,Matthew,Horne,146-06-7755,"PSC 1282, Box 7567
+APO AA 66328",196763,Self-Employed,610,25848,0,173,0.86

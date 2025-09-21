@@ -1,0 +1,4 @@
+debt_type,current_balance,monthly_payment,is_delinquent
+Credit Card,1426,22.36,False
+Credit Card,19056,517.21,False
+Student Loan,15560,637.74,True
