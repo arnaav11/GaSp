@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+42,Courtney,Clark,793-31-2222,"506 Duran Lane
+Lake Williamton, WY 60038",137741,Self-Employed,687,16407,91378,0,0.02

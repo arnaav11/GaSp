@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+27,Daniel,Jones,863-64-0170,"155 Brown Unions Suite 787
+North Eric, LA 42377",86397,Self-Employed,647,32548,65298,0,-0.15

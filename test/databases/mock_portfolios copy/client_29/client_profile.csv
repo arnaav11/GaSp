@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+29,Henry,Sanchez,159-76-3231,"9714 Mcmillan Heights Apt. 945
+Lawrencefurt, PA 44299",193905,Self-Employed,642,45856,0,0,0.6

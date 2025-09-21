@@ -1,0 +1,3 @@
+client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
+10,Gina,Brooks,898-54-6839,"Unit 7462 Box 7482
+DPO AA 68199",61244,Self-Employed,678,11940,0,0,-0.6
