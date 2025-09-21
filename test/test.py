@@ -6,3 +6,4 @@ import os
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout  
+df=pd.read_csv('databases/LC_loans_granting_model_dataset.csv')
