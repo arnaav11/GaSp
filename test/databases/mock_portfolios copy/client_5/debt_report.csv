@@ -1,0 +1,3 @@
+debt_type,current_balance,monthly_payment,is_delinquent
+Car Loan,11034,128.15,False
+Credit Card,8243,132.88,False
