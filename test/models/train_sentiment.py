@@ -1,25 +1,29 @@
 import pandas as pd
-import joblib
+import pickle
 from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 
 # ------------------------
 # 1. Load Sentiment Model + Tokenizer
 # ------------------------
-MODEL_PATH = MODEL_PATH = r"C:\Users\singh\GaSp\test\models\sentiment_analysis.keras"
-TOKENIZER_PATH = "tokenizer.pkl"
+MODEL_PATH = r"C:\Users\singh\GaSp\test\models\sentiment_analysis.keras"
+TOKENIZER_PATH = r"C:\Users\singh\GaSp\test\models\sentiment_analysis_tokenizer.pickle"
 MAX_LEN = 100   # must match training
 
 print("Loading model and tokenizer...")
 model = load_model(MODEL_PATH)
-tokenizer = joblib.load(TOKENIZER_PATH)
+
+with open(TOKENIZER_PATH, "rb") as f:
+    tokenizer = pickle.load(f)
 
 # ------------------------
 # 2. Load Bank Statements
 # ------------------------
-# Expected columns: Date, Description, Type, Amount, Balance, Label
+CSV_PATH = r"C:\Users\singh\GaSp\test\databases\mock_portfolios copy\all_statements.csv"
+
+# If CSV already has headers → set header=0 and remove 'names'
 statements = pd.read_csv(
-    "C:\Users\singh\GaSp\test\databases\mock_portfolios copy\all_statements.csv",
+    CSV_PATH,
     names=["date", "description", "type", "amount", "balance", "client_id"],
     header=None
 )
@@ -46,7 +50,8 @@ sentiments = [sentiment_map[c] for c in classes]
 # ------------------------
 # 5. Save New File
 # ------------------------
+OUTPUT_PATH = r"C:\Users\singh\GaSp\test\databases\mock_portfolios copy\allstatements_with_sentiment.csv"
 statements["sentiment"] = sentiments
-statements.to_csv("allstatements_with_sentiment.csv", index=False)
+statements.to_csv(OUTPUT_PATH, index=False)
 
-print("Done! Saved as allstatements_with_sentiment.csv")
+print(f" Done! Saved as {OUTPUT_PATH}")
