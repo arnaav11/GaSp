@@ -1,2 +1,3 @@
-debt_type,current_balance,monthly_payment,is_delinquent
-Car Loan,11047,469.8,False
+version https://git-lfs.github.com/spec/v1
+oid sha256:0039f043691784d98d46e0c6d752b253f265056f20dbda2c0335d4df96f21f86
+size 83

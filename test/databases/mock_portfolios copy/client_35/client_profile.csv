@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-35,Tyler,Ballard,188-13-2716,"9335 Dawson Mountains
-Christopherville, IA 65223",100419,Employed,717,19164,57360,0,0.37
+version https://git-lfs.github.com/spec/v1
+oid sha256:0f7f29c7c5a7e84faa3a76606c911680dba633df6bfa65529ac35776670b5a0e
+size 287

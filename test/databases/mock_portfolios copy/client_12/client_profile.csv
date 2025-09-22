@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-12,Robert,Stout,032-56-6912,"291 Dawson Crescent Suite 241
-Port Eddieport, WV 41036",63744,Self-Employed,599,9692,45323,0,-0.14
+version https://git-lfs.github.com/spec/v1
+oid sha256:824232be187c3dfc77d1e38a0102ca291482449559443b188639d450d07c0133
+size 296

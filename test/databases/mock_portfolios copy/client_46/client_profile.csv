@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-46,Hannah,Simpson,862-57-6591,"993 Sloan Glens Apt. 280
-Allenchester, NH 78740",88876,Employed,607,13215,0,1820,0.47
+version https://git-lfs.github.com/spec/v1
+oid sha256:6883e1fbb3e25134f8ca3853d926118f1022aa9152016875b3467e0ed4481d38
+size 285

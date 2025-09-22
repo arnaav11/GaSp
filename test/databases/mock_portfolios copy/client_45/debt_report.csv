@@ -1,4 +1,3 @@
-debt_type,current_balance,monthly_payment,is_delinquent
-Credit Card,12391,465.17,False
-Car Loan,1933,93.69,False
-Credit Card,19865,630.23,False
+version https://git-lfs.github.com/spec/v1
+oid sha256:0e76e832d560842c2eb2f631ca679da2133b64e08172bd238a145bd02305fbb7
+size 144

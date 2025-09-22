@@ -1,4 +1,3 @@
-debt_type,current_balance,monthly_payment,is_delinquent
-Student Loan,15179,196.58,False
-Credit Card,13422,214.19,False
-Student Loan,15502,374.76,False
+version https://git-lfs.github.com/spec/v1
+oid sha256:6ebaf24e08b04137c4c4db0ec076cfd1d0901273bdc37e74bb154520d69a1e2e
+size 151

@@ -1,2 +1,3 @@
-debt_type,current_balance,monthly_payment,is_delinquent
-Credit Card,13698,300.12,False
+version https://git-lfs.github.com/spec/v1
+oid sha256:f2c7fb8f46e187c739d92169c41c3bcd490113747b85a3fe463c08e6abab3bb2
+size 87

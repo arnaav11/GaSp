@@ -1,3 +1,3 @@
-client_id,first_name,last_name,ssn,address,annual_income,employment_status,credit_score,loan_amount_requested,collateral_value,alimony_payments_monthly,sentiment_score
-23,Joshua,Garcia,366-34-9332,"USNV Poole
-FPO AP 29130",99679,Self-Employed,746,6167,87693,0,-0.9
+version https://git-lfs.github.com/spec/v1
+oid sha256:33b662886bf9b5f5875f83aa9cc6e967e157d14830164180238971559b1550cc
+size 265
