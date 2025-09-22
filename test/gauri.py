@@ -1,57 +1,93 @@
 import pandas as pd
-import tensorflow as tf
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+# import tensorflow as tf
 import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Embedding
+# from tf.keras.preprocessing.text.Tokenizer import Tokenizer
+# from tf.keras.layers.Embedding import Embedding
+# from tf.keras.layers.Normalization import Normalization
+# from tf.keras.layers.Dense import Dense
+# from tf.keras.layers.LSTM import LSTM
+# from tf.keras.layers.Concatenate import Concatenate
 
-loan_df = pd.read_csv('databases/LC_loans_granting_model_dataset.csv')
-sentiment_df = pd.read_csv('databases/sentiment_analysis_gasp.csv', encoding='ISO-8859-1')
-lending_df = pd.read_csv('databases/train_lending_club.csv')
+import os
 
-# CLEANING DATASET
+# merging the client profiles from mock portfolios
+# list directory method python
 
-print(loan_df.head())
-print(sentiment_df.head())
-print(lending_df.head())
+folder_path = "test/databases/mock_portfolios copy"     # Path to the folder containing CSV filesn
 
-print(loan_df.info())
-print(sentiment_df.info())
-print(lending_df.info())
-df = loan_df.merge(sentiment_df, on="loan_id") \
-            .merge(lending_df, on="loan_id")
+contents = os.listdir(folder_path)
+print("Current directory contents:", contents)
 
+profiles= []
+for folder in contents:
+    try:
+        
+        df = pd.read_csv(os.path.join(folder_path, folder, "client_profile.csv"))
+        df = df.drop(columns=["address"])
+        profiles.append(df)
+       
+        print(df.head())
+    except Exception as e:
+        print(f"Error reading {folder}: {e}")
+    
+merged_df = pd.concat(profiles, ignore_index=True)
+print(merged_df.head())
+merged_df.to_csv(os.path.join(folder_path, 'all_profiles.csv'), index=False)
 
+#merging bank_statement.csv of every file with a unique client id
+statements = []
+for folder in contents:
+    try:
+        df = pd.read_csv(os.path.join(folder_path, folder, "bank_statement.csv"))
+        id = pd.read_csv(os.path.join(folder_path, folder, "client_profile.csv"))
+        
+        df["client_id"] = int(id["client_id"])
+        statements.append(df)
+        print(df.head())    
+    except Exception as e:
+        pass
+    
+merged_df = pd.concat(statements, ignore_index=True)
+print(merged_df.head())
+merged_df.to_csv(os.path.join(folder_path, 'all_statements.csv'), index=False)  
 
-X = df.drop(columns=['loan_status'])   # Features
-y = df['loan_status']                  # Target
-
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-X_train, X_test, y_train, y_test = train_test_split(
-    X_scaled, y, test_size=0.2, random_state=42
-)
-X_train, X_test, y_train, y_test = train_test_split(
-    X_scaled, y, test_size=0.2, random_state=42
-)
-
-model = Sequential([
-    Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
-    Dropout(0.3),
-    Dense(32, activation='relu'),
-    Dropout(0.3),
-    Dense(1, activation='sigmoid')  # sigmoid for binary classification
-])
-
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_split=0.2)
-loss, acc = model.evaluate(X_test, y_test)
-print(f"Test Accuracy: {acc:.2f}")
-predictions = model.predict(X_test[:5])
-print(predictions)
-predictions = model.predict(X_test[:5])
-print(predictions)
+# merged dep_report of every file witgh a unique client id
+debt_reports = []
+for folder in contents:
+    try:
+        df = pd.read_csv(os.path.join(folder_path, folder, "debt_report.csv"))
+        id = pd.read_csv(os.path.join(folder_path, folder, "client_profile.csv"))
+        
+        df["client_id"] = int(id["client_id"])
+        debt_reports.append(df)
+        print(df.head())    
+    except Exception as e:
+        pass    
+merged_df = pd.concat(debt_reports, ignore_index=True)
+print(merged_df.head()) 
+merged_df.to_csv(os.path.join(folder_path, 'all_debt_reports.csv'), index=False)    
+        
  
+
+###### 
+# sentiment_df = pd.read_csv('test/databases/sentiment_analysis_gasp.csv', encoding='ISO-8859-1')
+
+
+# print(sentiment_df.head())  
+
+# train
+
+
+
+
+
+
+
+# to train the model? creating the output table i have the input table which if all profiles right now
+
+
+
+
+
 
 
