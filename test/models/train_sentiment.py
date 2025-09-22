@@ -6,8 +6,8 @@ from keras.preprocessing.sequence import pad_sequences
 # ------------------------
 # 1. Load Sentiment Model + Tokenizer
 # ------------------------
-MODEL_PATH = r"C:\Users\singh\GaSp\test\models\sentiment_analysis.keras"
-TOKENIZER_PATH = r"C:\Users\singh\GaSp\test\models\sentiment_analysis_tokenizer.pickle"
+MODEL_PATH = r"test/models/sentiment_analysis.keras"
+TOKENIZER_PATH = r"test/models/sentiment_analysis_tokenizer.pickle"
 MAX_LEN = 100   # must match training
 
 print("Loading model and tokenizer...")
@@ -19,7 +19,7 @@ with open(TOKENIZER_PATH, "rb") as f:
 # ------------------------
 # 2. Load Bank Statements
 # ------------------------
-CSV_PATH = r"C:\Users\singh\GaSp\test\databases\mock_portfolios copy\all_statements.csv"
+CSV_PATH = r"test/databases/mock_portfolios copy/all_statements.csv"
 
 # If CSV already has headers → set header=0 and remove 'names'
 statements = pd.read_csv(
@@ -50,7 +50,7 @@ sentiments = [sentiment_map[c] for c in classes]
 # ------------------------
 # 5. Save New File
 # ------------------------
-OUTPUT_PATH = r"C:\Users\singh\GaSp\test\databases\mock_portfolios copy\allstatements_with_sentiment.csv"
+OUTPUT_PATH = r"test/databases/mock_portfolios copy/allstatements_with_sentiment.csv"
 statements["sentiment"] = sentiments
 statements.to_csv(OUTPUT_PATH, index=False)
 
