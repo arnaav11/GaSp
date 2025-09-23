@@ -9,7 +9,7 @@ import sys
 import xgboost as xgb
 
 
-FILE_PATH = '/Users/sanidhya/Downloads/train_lending_club.csv'
+FILE_PATH = 'test/databases/train_lending_club.csv'
 
 
 try:
@@ -23,7 +23,7 @@ except FileNotFoundError:
 features_to_drop = ['id', 'issue_d', 'sub_grade']
 df = df.drop(columns=features_to_drop)
 
- (the inputs)
+#  (the inputs)
 target = 'loan_status'
 y = df[target]
 X = df.drop(columns=target)
