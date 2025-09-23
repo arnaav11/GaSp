@@ -1,13 +1,12 @@
 import pandas as pd
-# import tensorflow as tf
+import tensorflow as tf
 import numpy as np
-# from tf.keras.preprocessing.text.Tokenizer import Tokenizer
-# from tf.keras.layers.Embedding import Embedding
-# from tf.keras.layers.Normalization import Normalization
-# from tf.keras.layers.Dense import Dense
-# from tf.keras.layers.LSTM import LSTM
-# from tf.keras.layers.Concatenate import Concatenate
-
+from tf.keras.preprocessing.text.Tokenizer import Tokenizer
+from tf.keras.layers.Embedding import Embedding
+from tf.keras.layers.Normalization import Normalization
+from tf.keras.layers.Dense import Dense
+from tf.keras.layers.LSTM import LSTM
+from tf.keras.layers.Concatenate import Concatenate
 import os
 
 # merging the client profiles from mock portfolios
@@ -65,7 +64,15 @@ for folder in contents:
         pass    
 merged_df = pd.concat(debt_reports, ignore_index=True)
 print(merged_df.head()) 
-merged_df.to_csv(os.path.join(folder_path, 'all_debt_reports.csv'), index=False)    
+merged_df.to_csv(os.path.join(folder_path, 'all_debt_reports.csv'), index=False)  
+
+
+
+
+
+
+
+  
         
  
 
