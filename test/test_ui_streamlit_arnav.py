@@ -1,4 +1,5 @@
 import streamlit as st
+from text_extract import extract_text_from_pdf
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -30,14 +31,14 @@ with col1:
     st.info("Personal Details & Tax Forms")
     personal_docs = st.file_uploader(
         "Upload client personal details, SSN, and tax forms (PDF, JPG)",
-        type=["pdf", "jpg", "jpeg", "png"],
+        type=["pdf"],
         accept_multiple_files=True
     )
 
     st.info("Bank Statements & Financial Records")
     financial_docs = st.file_uploader(
         "Upload bank statements and financial records (PDF, CSV)",
-        type=["pdf", "csv"],
+        type=["pdf"],
         accept_multiple_files=True
     )
 
@@ -45,14 +46,14 @@ with col2:
     st.info("Asset & Debt Documentation")
     asset_docs = st.file_uploader(
         "Upload proof of assets, collateral, and debt history (PDF, JPG)",
-        type=["pdf", "jpg", "jpeg", "png"],
+        type=["pdf"],
         accept_multiple_files=True
     )
 
     st.info("Additional Supporting Documents")
     additional_docs = st.file_uploader(
         "Upload any other relevant loan or alimony history documents",
-        type=["pdf", "docx"],
+        type=["pdf"],
         accept_multiple_files=True
     )
 
@@ -107,27 +108,63 @@ with col5:
     )
 
 # --- Important Data Points for Training Section ---
-st.markdown("---")
-st.header("3. Key Data Points for AI Model")
-st.markdown(
-    """
-    <p>
-    Our AI model is trained on a variety of crucial data points to provide its assessment, including:
-    </p>
-    """,
-    unsafe_allow_html=True
-)
+# st.markdown("---")
+# st.header("3. Key Data Points for AI Model")
+# st.markdown(
+#     """
+#     <p>
+#     Our AI model is trained on a variety of crucial data points to provide its assessment, including:
+#     </p>
+#     """,
+#     unsafe_allow_html=True
+# )
 
-st.text("— Credit History")
-st.text("— Income & Employment")
-st.text("— Debt & Assets")
-st.text("— Personal Information")
-st.text("— Loan Details")
-st.text("— Transactional Data & Digital Footprint")
-st.text("— Sentiment Analysis from documents")
+# st.text("— Credit History")
+# st.text("— Income & Employment")
+# st.text("— Debt & Assets")
+# st.text("— Personal Information")
+# st.text("— Loan Details")
+# st.text("— Transactional Data & Digital Footprint")
+# st.text("— Sentiment Analysis from documents")
+
+filepaths = []
+
+for i in personal_docs:
+    filepath = f'pdfs/{i.name}'
+    with open(filepath, 'wb') as pdf_file:
+        pdf_file.write(i.getvalue())
+
+    filepaths.append(filepath)
+
+for i in asset_docs:
+    filepath = f'pdfs/{i.name}'
+    with open(filepath, 'wb') as pdf_file:
+        pdf_file.write(i.getvalue())
+
+    filepaths.append(filepath)
+
+for i in financial_docs:
+    filepath = f'pdfs/{i.name}'
+    with open(filepath, 'wb') as pdf_file:
+        pdf_file.write(i.getvalue())
+
+    filepaths.append(filepath)
+
+for i in additional_docs:
+    filepath = f'pdfs/{i.name}'
+    with open(filepath, 'wb') as pdf_file:
+        pdf_file.write(i.getvalue())
+
+    filepaths.append(filepath)
+
+
 
 # --- Submission Button ---
 st.markdown("---")
 if st.button("Start Assessment", help="Click to begin the AI assessment."):
-    st.success("Assessment initiated! Since this is a UI-only demo, no backend processing will occur.")
+    texts = []
+    for i in filepaths:
+        texts.append(extract_text_from_pdf(i))
+        st.success(texts)
+    # st.success("Assessment initiated! Since this is a UI-only demo, no backend processing will occur.")
     st.balloons()
