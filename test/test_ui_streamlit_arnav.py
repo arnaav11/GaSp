@@ -4,6 +4,7 @@ import streamlit as st
 st.set_page_config(
     page_title="GASP: AI-Powered Portfolio Assessment",
     page_icon="💸",
+    
     layout="wide"
 )
 
