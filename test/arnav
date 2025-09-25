@@ -24,7 +24,7 @@ sentiment_df['sentiment'] = sentiment_df['sentiment'].apply(sentiment_to_num)
 sentiment_df
 
 # %%
-sentiment_model = tf.keras.models.Sequential()
+sentiment_model = tf.keras.preprocessing.sequence.load_model('test/models/sentiment_analysis.keras')
 sentiment_model
 
 # %%
@@ -51,35 +51,6 @@ tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=vocab_size, oov_toke
 tokenizer.fit_on_texts(X_train)
 tokenizer
 
-with open('models/sentiment_analysis_tokenizer.pickle', 'wb') as handle:
-    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-# %%
-train_sequences = tokenizer.texts_to_sequences(X_train)
-test_sequences = tokenizer.texts_to_sequences(X_test)
-
-train_padded = tf.keras.preprocessing.sequence.pad_sequences(train_sequences, maxlen=max_length, padding='post', truncating='post')
-test_padded = tf.keras.preprocessing.sequence.pad_sequences(test_sequences, maxlen=max_length, padding='post', truncating='post')
-
-# %%
-sentiment_model.add(tf.keras.layers.Embedding(vocab_size, embedding_dim, input_shape=(max_length,)))
-sentiment_model.add(tf.keras.layers.GlobalAveragePooling1D())
-sentiment_model.add(tf.keras.layers.Dense(256, activation='relu'))
-sentiment_model.add(tf.keras.layers.Dense(128, activation='relu'))
-sentiment_model.add(tf.keras.layers.Dropout(0.8))
-sentiment_model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-
-# %%
-sentiment_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-# sentiment_model.build(input_shape=(None, ))
-
-# %%
-sentiment_model.summary()
-os.listdir()
-
-# %%
-sentiment_model.fit(train_padded, y_train, epochs=10, validation_data=(test_padded, y_test))
-sentiment_model.save('models/sentiment_analysis.keras')
 
 # %%
 # Function to predict sentiment for new sentences
