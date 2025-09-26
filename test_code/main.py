@@ -7,7 +7,7 @@ from gauri_clienvalidity import run_client_assessment
     # 2. Import for output merging/saving
 from test_merge_arnav import generate_all_client_pdfs
 
-from pdf_to_csv_debug import process_files
+from pdf_to_csv_debug import extract_loan_data_to_dfs
 # -----------------------------------------------------------------
 ## 1. Directory Setup and Imports
 # -----------------------------------------------------------------
@@ -36,7 +36,8 @@ def step_1_data_receiver(filepaths: list[str]) -> tuple[pd.DataFrame, pd.DataFra
     print("\n[STEP 1/3] Data received and initialized.")
     # print(f"  -> Initialized {len(df_client_info)} client info records and {len(df_transactions)} transaction records.")
     print(f"  -> Processing file: {filepaths}")
-    return process_files(filepaths)
+    os.listdir()
+    return extract_loan_data_to_dfs(filepaths)
 
 def step_2_analyze(df_client_info: pd.DataFrame, df_transactions: pd.DataFrame) -> pd.DataFrame:
     """
