@@ -1,6 +1,6 @@
 # analyze_clients.py
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import numpy as np
 import tensorflow as tf
 
 # Import pre-loaded sentiment model + tokenizer
