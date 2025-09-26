@@ -63,8 +63,8 @@ def get_sentiment_score(text):
 # -------------------------
 # 4. Load trained client score model + scaler
 # -------------------------
-client_model = tf.keras.models.load_model("test\models\sentiment_analysis.keras")
-with open("test\models\sentiment_analysis_tokenizer.pickle", "rb") as handle:
+client_model = tf.keras.models.load_model("test/models/sentiment_analysis.keras")
+with open("test/models/sentiment_analysis_tokenizer.pickle", "rb") as handle:
     scaler = pickle.load(handle)
 
 # -------------------------
