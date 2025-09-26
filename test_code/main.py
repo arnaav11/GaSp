@@ -5,9 +5,9 @@ import numpy as np
 from gauri_clienvalidity import run_client_assessment
 
     # 2. Import for output merging/saving
-from test_code.test_merge_arnav import create_client_report
+from test_merge_arnav import generate_all_client_pdfs
 
-from test_code.pdf_to_csv_debug import read_pdf_dataframes_from_file as process_pdf_to_dataframes
+from pdf_to_csv_debug import convert_bank_statement_to_loan_dataframes
 # -----------------------------------------------------------------
 ## 1. Directory Setup and Imports
 # -----------------------------------------------------------------
@@ -36,7 +36,7 @@ def step_1_data_receiver(filepaths: list[str]) -> tuple[pd.DataFrame, pd.DataFra
     print("\n[STEP 1/3] Data received and initialized.")
     # print(f"  -> Initialized {len(df_client_info)} client info records and {len(df_transactions)} transaction records.")
     
-    return process_pdf_to_dataframes(filepaths[0])
+    return convert_bank_statement_to_loan_dataframes(filepaths[0])
 
 def step_2_analyze(df_client_info: pd.DataFrame, df_transactions: pd.DataFrame) -> pd.DataFrame:
     """
@@ -44,6 +44,7 @@ def step_2_analyze(df_client_info: pd.DataFrame, df_transactions: pd.DataFrame) 
     function, passing it both required DataFrames.
     """
     print("\n[STEP 2/3] Running client validity analysis...")
+    print(f"  -> Analyzing {len(df_client_info)} clients with {len(df_transactions)} transactions...")
     df_results = run_client_assessment(df_client_info, df_transactions) 
     print("  -> Analysis complete.")
     return df_results
@@ -55,7 +56,7 @@ def step_3_save_output(df_results: pd.DataFrame, df_transactions: pd.DataFrame, 
     """
     print("\n[STEP 3/3] Merging and saving final report...")
     # FIX: Pass the raw transactions data, as required by create_client_report
-    create_client_report(df_results, df_transactions, output_path) 
+    generate_all_client_pdfs(df_results, df_transactions, output_path) 
     print(f"  -> Final report successfully saved to: {output_path}")
 
 # -----------------------------------------------------------------

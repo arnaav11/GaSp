@@ -2,91 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import time 
-import io # We'll use this for reading files into pandas
-
-# --- Data Extraction Function (New) ---
-def get_extracted_data(uploaded_files):
-    """
-    Simulates extracting key financial data points from the content of uploaded files.
-    In a real app, this would be done by an LLM or OCR process.
-    """
-    extracted_metrics = {
-        'credit_score': 750,        # Default placeholder if data not found
-        'annual_salary': 0,         # Default placeholder
-        'loan_requested': 0,        # Default placeholder
-        'pipeline_summary': []
-    }
-
-    for f in uploaded_files:
-        filename = f.name
-        file_content = ""
-        
-        try:
-            # For simplicity in this simulation, we read PDF/DOCX content as text string 
-            # (In a real app, f.read() provides bytes, and you need a PDF parser to get text)
-            if filename.lower().endswith(('.pdf', '.docx')):
-                # Simulate reading the content of a structured report (text)
-                # Since we don't have a PDF parser, we simulate the extraction using known text.
-                if filename == "Client_Report_1_Newman.pdf":
-                    # Hardcode extraction based on the known PDF content for demonstration
-                    extracted_metrics['credit_score'] = 612
-                    extracted_metrics['annual_salary'] = 136817
-                    extracted_metrics['loan_requested'] = 13723
-                    
-                    extracted_metrics['pipeline_summary'].append(f"✅ {filename}: Key metrics extracted (Credit: 612, Income: $136,817)")
-                else:
-                     extracted_metrics['pipeline_summary'].append(f"✅ {filename}: Read successfully (PDF/Docx).")
-
-            elif filename.lower().endswith(('.csv')):
-                df = pd.read_csv(f)
-                extracted_metrics['pipeline_summary'].append(f"✅ {filename}: Read successfully as CSV. Shape: {df.shape}")
-            
-            else:
-                extracted_metrics['pipeline_summary'].append(f"⚠️ {filename}: File type read, no metrics extracted.")
-
-        except Exception as e:
-            extracted_metrics['pipeline_summary'].append(f"❌ {f.name}: Failed to read content. Error: {e}")
-            
-    return extracted_metrics
-
-
-# --- Main Pipeline Function ---
-def run_gasp_pipeline(uploaded_files):
-    """
-    The main analysis function that drives the results.
-    """
-    extracted_data = get_extracted_data(uploaded_files)
-    
-    # Simple logic to determine Risk/Viability based on extracted Credit Score
-    risk_score = extracted_data['credit_score']
-    
-    if risk_score >= 740:
-        viability = "High"
-        fraud = "Very Low"
-        approval = "95%"
-        dti = "28%"
-        insights = "The client's excellent credit history and high income suggest a very high likelihood of loan approval with optimal terms. Asset liquidity is strong."
-    elif risk_score >= 670:
-        viability = "Medium-High"
-        fraud = "Low"
-        approval = "85%"
-        dti = "35%"
-        insights = "The client's credit profile is good, but potential approval rates could be improved by reducing minor outstanding debts. Low fraud risk."
-    else: # Score < 670 (like 612)
-        viability = "Moderate-Low"
-        fraud = "Moderate"
-        approval = "60%"
-        dti = "45%" # A higher DTI to reflect the risk
-        insights = f"**ATTENTION**: The client's credit score ({risk_score}) indicates a moderate-to-high risk. Approval is possible but will require a higher interest rate and deeper collateral review. Focus on improving DTI ratio."
-    
-    extracted_data['viability'] = viability
-    extracted_data['fraud'] = fraud
-    extracted_data['approval'] = approval
-    extracted_data['dti'] = dti
-    extracted_data['insights'] = insights
-
-    return extracted_data
-
+from main import run_gasp_pipeline
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -255,15 +171,15 @@ st.markdown(
     /* Main container for the file uploader (the "drag and drop" area) */
     [data-testid="stFileUploader"] {
         border-radius: 10px;
-        border: 2px dashed #b19cd9;      /* Purple dashed border */
-        background-color: #000000;       /* Black background */
+        border: 2px dashed #b19cd9;      /* Purple dashed border */
+        background-color: #000000;       /* Black background */
         padding: 1rem;
     }
 
     /* The 'Browse files' button inside the uploader */
     section[data-testid="stFileUploader"] button {
         background-color: #000000 !important; /* Black background */
-        color: #000000 !important;            /* White text */
+        color: #000000 !important;            /* White text */
         border: 1px solid #b19cd9 !important; /* Purple border */
     }
 
@@ -295,8 +211,10 @@ def start_assessment():
     all_uploaded_files = []
     file_keys = ['personal_docs', 'financial_docs', 'asset_docs', 'additional_docs']
     
+    # Collect all file objects
     for key in file_keys:
         files = st.session_state.get(key)
+        # We pass the file objects (which contain the .name property) to the pipeline
         if files and isinstance(files, list):
             all_uploaded_files.extend(files)
 
@@ -355,7 +273,7 @@ st.markdown("---")
 # --- Content for Each Section ---
 if st.session_state.selected_section == "Client Documents":
     st.header("1. Client Portfolio & Document Submission")
-    st.markdown("_Securely upload the required documents for a thorough analysis. Our platform supports various file types and ensures data privacy and security._")
+    st.markdown("_Securely upload the required documents for a thorough analysis. Our platform supports various file types and ensures data privacy and security. **Note:** Only the file path/name is used for simulation._")
 
     col1, col2 = st.columns(2, gap="large")
     with col1:
@@ -494,7 +412,8 @@ elif st.session_state.selected_section == "Assessment Results":
         with col_metrics1:
             # Display the calculated DTI based on the credit score
             st.metric(label="Debt-to-Income Ratio", value=results['dti'], delta="-2%", delta_color="inverse", help="Lower is better.")
-            st.metric(label="Asset-to-Debt Ratio", value="4.5x", delta="+0.3x", help="Higher is better.") # Still placeholder
+            # Display the dynamically extracted Annual Salary
+            st.metric(label="Annual Salary (Extracted)", value=f"${results['annual_salary']:,.0f}", help="Extracted from uploaded documents.") 
         with col_metrics2:
             # Display the calculated Approval rate based on the credit score
             st.metric(label="Projected Loan Approval", value=results['approval'], delta="Adjusted based on Credit Score") 
