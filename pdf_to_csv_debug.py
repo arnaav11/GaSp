@@ -121,6 +121,19 @@ def process_all_pdfs(
         else:
             print(f"⚠️ Skipping missing file: {filepath}")
 
+    # ✅ Left-align all rows (shift non-empty values to the left)
+    df = df.apply(lambda row: pd.Series([x for x in row if pd.notna(x)]), axis=1)
+
+    # ✅ Optional: clean Description values
+    if "Description" in df.columns:
+        df["Description"] = (
+            df["Description"]
+            .fillna("")
+            .astype(str)
+            .str.replace(".pdf", "", regex=False)
+            .str.strip(",")
+        )
+
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
     
@@ -137,6 +150,7 @@ def process_all_pdfs(
         df_client_info.to_csv(output_file_info, index=False)
         print(f"✅ Client Info CSV created: {output_file_info} ({len(df_client_info)} rows)")
 
+<<<<<<< HEAD
     # Create and save transactions CSV
     if all_transactions:
         df_transactions = pd.DataFrame(all_transactions)
@@ -152,3 +166,12 @@ def process_all_pdfs(
 
 # Run the script with your PDF file
 # process_all_pdfs(pdf_files=["Client_Report_1_Newman.pdf"])
+=======
+    output_file = os.path.join(output_folder, "Master_All_Clients.csv")
+    df.to_csv(output_file, index=False, header=False)  # no weird headers, pure data
+    print(f"✅ Master CSV created (left-aligned): {output_file} ({len(df)} rows)")
+
+
+# Run
+process_all_pdfs()
+>>>>>>> 455116060e98c7b5aa22eb5a8d7c16b1984a07c8
