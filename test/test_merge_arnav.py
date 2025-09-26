@@ -16,7 +16,9 @@ profiles_csv = """client_id,first_name,last_name,ssn,address,annual_income,emplo
 3,Charles,Henderson,774-71-9919,"52585 Kathleen Hollow Apt. 843\nSouth Raymondview, KY 05968",142614,Self-Employed,715,36903,57272,1420,-0.46
 4,Darlene,Brock,593-62-9717,"2234 Johnny Cliffs\nLake Vanessa, ME 96557",199520,Self-Employed,843,17739,45291,0,-0.42
 """
-df_profiles = pd.read_csv(StringIO(profiles_csv))
+df_profiles = pd.read_csv('client_analysis_results.csv')
+
+
 
 # Data from initial transaction input (Statement Data Source 1)
 transactions_csv_1 = """client_id,date,description,type,amount,balance
@@ -29,18 +31,9 @@ transactions_csv_1 = """client_id,date,description,type,amount,balance
 1,2025-04-18,Gas Station - Shell,DEBIT,55.12,9624.77
 1,2025-04-22,Online Retail - Amazon,DEBIT,123.45,9501.32
 """
-df_transactions_1 = pd.read_csv(StringIO(transactions_csv_1))
+df_transactions_1 = pd.read_csv('output/client_transactions.csv')
 
 # Data from all_statements2.csv (Statement Data Source 2 - NEW DATA)
-transactions_csv_2 = """client_id,date,description,type,amount,balance
-1,2025-04-06,Streaming Service - Apple App Store,DEBIT,365.46,7019.54
-1,2025-04-10,"Refund from Garcia, Wang and Allen",CREDIT,464.71,7484.25
-1,2025-04-11,Health Products - Pharmacy,DEBIT,202.87,7281.38
-1,2025-04-12,Dining - Whole Foods,DEBIT,1.49,7279.89
-1,2025-04-14,Prescription - CVS,DEBIT,417.37,6862.52
-1,2025-04-18,Freelance Work,CREDIT,317.22,7179.74
-"""
-df_transactions_2 = pd.read_csv(StringIO(transactions_csv_2))
 
 
 # --- 2. Combine Transaction Data ---
@@ -48,7 +41,7 @@ df_transactions_2 = pd.read_csv(StringIO(transactions_csv_2))
 # we'll use the DISTINCT, combined set. The most reliable way is to concatenate 
 # and then remove duplicates if they exist, or simply assume df_transactions_2 
 # is the new/updated transaction ledger. For robustness, we will combine all unique records.
-df_transactions = pd.concat([df_transactions_1, df_transactions_2]).drop_duplicates(subset=['client_id', 'date', 'amount', 'balance'], keep='last').reset_index(drop=True)
+df_transactions = df_transactions_1.copy()
 
 
 # --- 3. Data Cleaning and Formatting ---
