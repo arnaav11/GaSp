@@ -1,136 +1,154 @@
 import pdfplumber
 import pandas as pd
 import re
-import glob
 import os
 
 def parse_pdf(filepath):
-    """Extract structured data from one PDF file."""
-    data = []
+    """
+    Extracts structured client information and transaction history from a PDF file.
+    Returns two lists: one for client details and one for transactions.
+    """
+    client_info_data = []
+    transaction_data = []
+    client_id = None
+    
     with pdfplumber.open(filepath) as pdf:
         for page_num, page in enumerate(pdf.pages, start=1):
             text = page.extract_text()
             if not text:
                 continue
 
-            # Normalize by removing **bold markers**
+            # Normalize text by removing bold markers and extra spaces
             clean_text = text.replace("**", "")
-
+            
             # ------------------------
-            # Bank Statement Transactions
-            # ------------------------
-            if "Monthly Account Statement" in clean_text:
-                transaction_lines = re.findall(
-                    r"(\d{4}-\d{2}-\d{2})\s+(.+?)\s+(DEBIT|CREDIT)\s+\$([\d,]+\.\d{2})\s+\$([\d,]+\.\d{2})",
-                    clean_text
-                )
-                for t in transaction_lines:
-                    date, desc, ttype, amt, bal = t
-                    data.append({
-                        "Date": date,
-                        "Description": desc.strip(),
-                        "Type": ttype,
-                        "Amount": float(amt.replace(",", "")) * (-1 if ttype == "DEBIT" else 1),
-                        "Balance": float(bal.replace(",", "")),
-                        "File": os.path.basename(filepath),
-                        "Source": "Bank Statement"
-                    })
-
-            # ------------------------
-            # Client Reports
+            # Extract Client Report data first as it contains the Client ID
             # ------------------------
             if "Comprehensive Client Financial Report" in clean_text:
+                # Extract main client details
                 client_match = re.search(r"Client Name:\s*(.+?)\s*\|\s*Client ID:\s*(\d+)", clean_text)
                 if client_match:
-                    client_name, client_id = client_match.groups()
-                    data.append({
-                        "Client ID": client_id,
-                        "Client Name": client_name,
-                        "File": os.path.basename(filepath),
-                        "Source": "Client Report"
-                    })
+                    full_name, client_id = client_match.groups()
+                    parts = full_name.split()
+                    first_name = parts[0]
+                    last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
 
-                income_match = re.search(r"Annual Income:\s*\$?([\d,]+)", clean_text)
-                if income_match:
-                    data.append({
-                        "Annual Income": float(income_match.group(1).replace(",", "")),
-                        "File": os.path.basename(filepath),
-                        "Source": "Client Report"
-                    })
-
-                credit_match = re.search(r"Credit Score:\s*(\d+)", clean_text)
-                if credit_match:
-                    data.append({
-                        "Credit Score": int(credit_match.group(1)),
-                        "File": os.path.basename(filepath),
-                        "Source": "Client Report"
-                    })
-
+                # Initialize a dictionary for client info
+                client_dict = {
+                    "client_id": client_id,
+                    "first_name": first_name.strip(),
+                    "last_name": last_name.strip(),
+                }
+                
+                # Use more specific regex patterns to prevent data bleed between fields
+                ssn_match = re.search(r"SSN:\s*([^\n\r]+?)\s*Annual Income:", clean_text)
+                address_match = re.search(r"Address:\s*([^\n\r]+?)\s*Employment:", clean_text)
+                annual_income_match = re.search(r"Annual Income:\s*\$?([\d,]+)", clean_text)
+                employment_status_match = re.search(r"Employment:\s*([^\n\r]+?)\s*Credit Score:", clean_text)
+                credit_score_match = re.search(r"Credit Score:\s*(\d+)", clean_text)
                 loan_req_match = re.search(r"Loan Requested:\s*\$?([\d,]+)", clean_text)
-                if loan_req_match:
-                    data.append({
-                        "Loan Requested": float(loan_req_match.group(1).replace(",", "")),
-                        "File": os.path.basename(filepath),
-                        "Source": "Client Report"
-                    })
+                collateral_match = re.search(r"Collateral Value:\s*([^\n\r]+?)\s*Monthly Alimony:", clean_text)
+                alimony_match = re.search(r"Monthly Alimony:\s*([^\n\r]+?)\s*LOAN & CREDIT PROFILE SUMMARY", clean_text)
+                sentiment_match = re.search(r"Client Sentiment Score:\s*(-?[\d.]+)", clean_text)
+                
+                client_dict["ssn"] = ssn_match.group(1).strip() if ssn_match else None
+                client_dict["address"] = address_match.group(1).strip() if address_match else None
+                client_dict["annual_income"] = float(annual_income_match.group(1).replace(",", "")) if annual_income_match else None
+                client_dict["employment_status"] = employment_status_match.group(1).strip() if employment_status_match else None
+                client_dict["credit_score"] = int(credit_score_match.group(1)) if credit_score_match else None
+                client_dict["loan_amount_requested"] = float(loan_req_match.group(1).replace(",", "")) if loan_req_match else None
+                client_dict["collateral_value"] = collateral_match.group(1).strip() if collateral_match else None
+                client_dict["alimony_payments_monthly"] = alimony_match.group(1).strip() if alimony_match else None
+                client_dict["sentiment_score"] = float(sentiment_match.group(1)) if sentiment_match else None
+
+                client_info_data.append(client_dict)
 
             # ------------------------
-            # Loan Applications
+            # Bank Statement Transactions (using table extraction for reliability)
             # ------------------------
-            if "Personal Loan Application Summary" in clean_text:
-                fullname_match = re.search(r"Full Name:\s*(.+)", clean_text)
-                if fullname_match:
-                    data.append({
-                        "Client Name": fullname_match.group(1).strip(),
-                        "File": os.path.basename(filepath),
-                        "Source": "Loan Application"
-                    })
+            tables = page.extract_tables()
+            for table in tables:
+                # Check for the header row to ensure it's the transaction table
+                if table and table[0] and "Date" in table[0][0] and "Description" in table[0][1]:
+                    # Process the rows, skipping the header
+                    for row in table[1:]:
+                        if row and row[0]: # Ensure row is not empty
+                            date = row[0].strip()
+                            desc = row[1].strip()
+                            ttype = row[2].strip()
+                            
+                            # Clean up and convert amount/balance
+                            amt_str = row[3].replace("$", "").replace(",", "")
+                            bal_str = row[4].replace("$", "").replace(",", "")
+                            
+                            try:
+                                amount = float(amt_str) * (-1 if ttype == "DEBIT" else 1)
+                                balance = float(bal_str)
+                            except (ValueError, IndexError):
+                                # Skip row if amount or balance is missing or malformed
+                                continue
 
-                income_match = re.search(r"Annual Income:\s*\$?([\d,]+)", clean_text)
-                if income_match:
-                    data.append({
-                        "Annual Income": float(income_match.group(1).replace(",", "")),
-                        "File": os.path.basename(filepath),
-                        "Source": "Loan Application"
-                    })
+                            transaction_dict = {
+                                "client_id": client_id,
+                                "date": date,
+                                "description": desc,
+                                "type": ttype,
+                                "amount": amount,
+                                "balance": balance,
+                            }
+                            transaction_data.append(transaction_dict)
 
-                credit_match = re.search(r"Credit Score:\s*(\d+)", clean_text)
-                if credit_match:
-                    data.append({
-                        "Credit Score": int(credit_match.group(1)),
-                        "File": os.path.basename(filepath),
-                        "Source": "Loan Application"
-                    })
-
-                loan_req_match = re.search(r"Loan Amount Requested:\s*\$?([\d,]+)", clean_text)
-                if loan_req_match:
-                    data.append({
-                        "Loan Amount Requested": float(loan_req_match.group(1).replace(",", "")),
-                        "File": os.path.basename(filepath),
-                        "Source": "Loan Application"
-                    })
-
-    return data
+    return client_info_data, transaction_data
 
 
 def process_all_pdfs(
-    folder=r"C:\Users\singh\OneDrive\Desktop\pdfs",
-    output_folder=r"C:\Users\singh\GaSp\test\databases"
+    pdf_files=None,
+    output_folder="output"
 ):
-    """Process all PDFs in a folder into one CSV at the given output path."""
-    all_data = []
-    for filepath in glob.glob(os.path.join(folder, "*.pdf")):
-        all_data.extend(parse_pdf(filepath))
+    """Processes all given PDFs into two CSV files."""
+    if pdf_files is None:
+        # Example files, replace with your actual file paths
+        pdf_files = ["Client_Report_1_Newman.pdf"]
 
-    df = pd.DataFrame(all_data)
+    all_client_info = []
+    all_transactions = []
+    
+    for filepath in pdf_files:
+        if os.path.exists(filepath):
+            client_data, transaction_data = parse_pdf(filepath)
+            all_client_info.extend(client_data)
+            all_transactions.extend(transaction_data)
+        else:
+            print(f"⚠️ Skipping missing file: {filepath}")
 
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
+    
+    # Create and save client info CSV
+    if all_client_info:
+        df_client_info = pd.DataFrame(all_client_info)
+        # Reorder columns as requested
+        cols = ["client_id", "first_name", "last_name", "ssn", "address", "annual_income", 
+                "employment_status", "credit_score", "loan_amount_requested", 
+                "collateral_value", "alimony_payments_monthly", "sentiment_score"]
+        df_client_info = df_client_info.reindex(columns=cols)
+        
+        output_file_info = os.path.join(output_folder, "client_info.csv")
+        df_client_info.to_csv(output_file_info, index=False)
+        print(f"✅ Client Info CSV created: {output_file_info} ({len(df_client_info)} rows)")
 
-    output_file = os.path.join(output_folder, "Master_All_Clients.csv")
-    df.to_csv(output_file, index=False)
-    print(f"✅ Master CSV created: {output_file} ({len(df)} rows)")
+    # Create and save transactions CSV
+    if all_transactions:
+        df_transactions = pd.DataFrame(all_transactions)
+        # Reorder columns as requested
+        cols = ["client_id", "date", "description", "type", "amount", "balance"]
+        df_transactions = df_transactions.reindex(columns=cols)
+        output_file_transactions = os.path.join(output_folder, "client_transactions.csv")
+        df_transactions.to_csv(output_file_transactions, index=False)
+        print(f"✅ Client Transactions CSV created: {output_file_transactions} ({len(df_transactions)} rows)")
+        
+    return df_client_info, df_transactions
 
 
-# Run
-process_all_pdfs()
+# Run the script with your PDF file
+# process_all_pdfs(pdf_files=["Client_Report_1_Newman.pdf"])
