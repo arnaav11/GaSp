@@ -124,12 +124,25 @@ def process_all_pdfs(
 
     df = pd.DataFrame(all_data)
 
+    # ✅ Left-align all rows (shift non-empty values to the left)
+    df = df.apply(lambda row: pd.Series([x for x in row if pd.notna(x)]), axis=1)
+
+    # ✅ Optional: clean Description values
+    if "Description" in df.columns:
+        df["Description"] = (
+            df["Description"]
+            .fillna("")
+            .astype(str)
+            .str.replace(".pdf", "", regex=False)
+            .str.strip(",")
+        )
+
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
 
     output_file = os.path.join(output_folder, "Master_All_Clients.csv")
-    df.to_csv(output_file, index=False)
-    print(f"✅ Master CSV created: {output_file} ({len(df)} rows)")
+    df.to_csv(output_file, index=False, header=False)  # no weird headers, pure data
+    print(f"✅ Master CSV created (left-aligned): {output_file} ({len(df)} rows)")
 
 
 # Run
