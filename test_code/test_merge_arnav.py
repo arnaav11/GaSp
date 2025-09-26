@@ -5,6 +5,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 import datetime
+import re # <-- ADDED: Need 're' for robust string cleaning
 
 # --- 1. PDF Setup ---
 styles = getSampleStyleSheet()
@@ -21,6 +22,36 @@ styles.add(ParagraphStyle(name='SmallText', fontName='Helvetica-Oblique', fontSi
 
 # Style for the final assessment paragraph
 assessment_style = ParagraphStyle(name='Assessment', fontName='Helvetica-Bold', fontSize=11, spaceAfter=15, textColor=NAVY_BLUE)
+
+
+# ----------------------------------------------------------------------
+## HELPER FUNCTION: CURRENCY CONVERSION
+# ----------------------------------------------------------------------
+def clean_and_convert_currency(s) -> float:
+    """Removes currency symbols and commas, then converts the string to a float."""
+    if pd.isna(s) or s is None:
+        return 0.0
+    
+    s = str(s).strip()
+    if s.lower() in ('n/a', 'na', 'none', ''):
+        return 0.0
+
+    # Remove currency symbols ($,), commas, and handle parentheses for negative numbers
+    cleaned = re.sub(r'[$,]', '', s).strip()
+    
+    # Check for parentheses which often denote negative numbers in finance
+    if '(' in s and ')' in s:
+        cleaned = "-" + re.sub(r'[()]', '', cleaned)
+        
+    try:
+        return float(cleaned)
+    except ValueError:
+        # Fallback in case the original string was already a valid float but was typecast as str
+        try:
+            return float(s)
+        except ValueError:
+            return 0.0
+
 
 # ----------------------------------------------------------------------
 ## NEW FUNCTION: STATEMENT PDF GENERATION
@@ -43,15 +74,15 @@ def create_client_statement_pdf(p: pd.Series, client_transactions: pd.DataFrame,
 
     # --- Document Header ---
     story.append(Paragraph("CLIENT ACCOUNT STATEMENT", styles['TitleStyle']))
-    story.append(Paragraph(f"**Client Name:** {p.get('first_name', 'N/A')} {p.get('last_name', 'N/A')} | **Client ID:** {client_id}", styles['SectionHeader']))
+    story.append(Paragraph(f"Client Name: {p.get('first_name', 'N/A')} {p.get('last_name', 'N/A')} | Client ID: {client_id}", styles['SectionHeader']))
     
     if not client_transactions.empty:
         # Determine the statement period
         start_date = client_transactions['date'].min().strftime('%Y-%m-%d')
         end_date = client_transactions['date'].max().strftime('%Y-%m-%d')
         
-        story.append(Paragraph(f"**Statement Period:** {start_date} to {end_date}", styles['SmallText']))
-        story.append(Paragraph(f"**Report Date:** {datetime.datetime.now().strftime('%Y-%m-%d')}", styles['SmallText']))
+        story.append(Paragraph(f"Statement Period: {start_date} to {end_date}", styles['SmallText']))
+        story.append(Paragraph(f"Report Date: {datetime.datetime.now().strftime('%Y-%m-%d')}", styles['SmallText']))
         story.append(Spacer(1, 0.25 * inch))
 
         # ----------------------------------------------------------------------
@@ -68,17 +99,15 @@ def create_client_statement_pdf(p: pd.Series, client_transactions: pd.DataFrame,
         
         # Determine the opening/closing balance for the statement period
         try:
-            # Assuming transactions are sorted oldest to newest
             first_transaction = client_transactions.iloc[0]
-            # Opening balance is the first balance minus the first transaction amount 
-            # (if it was a credit, otherwise plus the amount for a debit).
+            # This calculation now works because 'amount' and 'balance' are floats
             opening_balance = first_transaction['balance'] - first_transaction['amount'] if first_transaction['type'] == 'CREDIT' else first_transaction['balance'] + first_transaction['amount']
             closing_balance = client_transactions['balance_fmt'].iloc[-1]
         except Exception:
             opening_balance = 0.00
             closing_balance = "$0.00"
         
-        story.append(Paragraph(f"**Opening Balance:** ${opening_balance:,.2f} | **Closing Balance:** {closing_balance}", styles['ProfileBody']))
+        story.append(Paragraph(f"Opening Balance: ${opening_balance:,.2f} | Closing Balance: {closing_balance}", styles['ProfileBody']))
         story.append(Spacer(1, 0.1 * inch))
 
         # Create the transaction table
@@ -126,11 +155,11 @@ def create_client_loan_report_pdf(p: pd.Series, client_id: int, pdf_filename: st
 
     # --- Document Header ---
     story.append(Paragraph("CLIENT LOAN & CREDIT PROFILE", styles['TitleStyle']))
-    story.append(Paragraph(f"**Client Name:** {p.get('first_name', 'N/A')} {p.get('last_name', 'N/A')} | **Client ID:** {client_id}", styles['SectionHeader']))
-    story.append(Paragraph(f"**Report Date:** {datetime.datetime.now().strftime('%Y-%m-%d')}", styles['SmallText']))
+    story.append(Paragraph(f"Client Name: {p.get('first_name', 'N/A')} {p.get('last_name', 'N/A')} | Client ID: {client_id}", styles['SectionHeader']))
+    story.append(Paragraph(f"Report Date: {datetime.datetime.now().strftime('%Y-%m-%d')}", styles['SmallText']))
     
     # Display the final predictive assessment
-    story.append(Paragraph(f"**Final Assessment:** {p.get('assessment', 'N/A')}", assessment_style))
+    story.append(Paragraph(f"Final Assessment: {p.get('assessment', 'N/A')}", assessment_style))
 
     story.append(Spacer(1, 0.25 * inch))
 
@@ -160,8 +189,9 @@ def create_client_loan_report_pdf(p: pd.Series, client_id: int, pdf_filename: st
     story.append(Spacer(1, 0.25 * inch))
     
     # Sentiment Score Analysis
-    sentiment_score = p.get('sentiment_score', 0.0)
-    sentiment_str = f"Client Sentiment Score: **{sentiment_score:.2f}**"
+    sentiment_score = p.get('predicted_client_score', 0.0)
+    sentiment_str = f"Client Sentiment Score: {sentiment_score:.2f}"
+    print(sentiment_str)
     
     if sentiment_score < -0.5:
         sentiment_note = "Very Negative - Possible dissatisfaction or risk detected."
@@ -181,7 +211,7 @@ def create_client_loan_report_pdf(p: pd.Series, client_id: int, pdf_filename: st
 
 
 # ----------------------------------------------------------------------
-## MAIN ORCHESTRATOR FUNCTION (Renamed/Modified)
+## MAIN ORCHESTRATOR FUNCTION (Modified)
 # ----------------------------------------------------------------------
 
 def generate_all_client_pdfs(df_profiles_scored: pd.DataFrame, df_transactions_raw: pd.DataFrame, output_dir: str):
@@ -200,14 +230,21 @@ def generate_all_client_pdfs(df_profiles_scored: pd.DataFrame, df_transactions_r
     # --- Data Cleaning and Formatting ---
     df_transactions_raw['description'] = df_transactions_raw['description'].fillna('N/A')
     df_transactions_raw['date'] = pd.to_datetime(df_transactions_raw['date']) 
+    
+    # FIX: Convert amount and balance to numeric float types before formatting
+    df_transactions_raw['amount'] = df_transactions_raw['amount'].apply(clean_and_convert_currency)
+    df_transactions_raw['balance'] = df_transactions_raw['balance'].apply(clean_and_convert_currency)
+
+    # These lines now work because 'amount' and 'balance' are floats
     df_transactions_raw['amount_fmt'] = df_transactions_raw['amount'].apply(lambda x: f"${x:,.2f}")
     df_transactions_raw['balance_fmt'] = df_transactions_raw['balance'].apply(lambda x: f"${x:,.2f}")
     
     # Pre-format financial columns in the profiles dataframe
     currency_cols = ['annual_income', 'loan_amount_requested', 'collateral_value', 'alimony_payments_monthly']
     for col in currency_cols:
-         # Use .get(col, 0) to safely handle columns that might be missing
-        df_profiles_scored[f'{col}_fmt'] = df_profiles_scored.get(col, 0).apply(lambda x: f"${x:,.0f}" if x > 0 else "N/A")
+        # We ensure the data being formatted is numeric or treated as 0 for safe formatting
+        column_data = df_profiles_scored[col].apply(lambda x: clean_and_convert_currency(x) if isinstance(x, str) else x)
+        df_profiles_scored[f'{col}_fmt'] = column_data.apply(lambda x: f"${x:,.0f}" if pd.notna(x) and x > 0 else "N/A")
     
     # Group the raw transactions data by client_id
     grouped_transactions = df_transactions_raw.groupby('client_id')

@@ -12,8 +12,8 @@ import pickle
 def run_client_assessment(
     client_info: pd.DataFrame, 
     client_transaction: pd.DataFrame,
-    model_path: str = "test/models/client_score.keras",
-    scaler_path: str = "test/models/client_score_scaler.pickle",
+    model_path: str = "test_code/models/client_score.keras",
+    scaler_path: str = "test_code/models/client_score_scaler.pickle",
     output_file_path: str = 'client_analysis_results.csv'
 ) -> pd.DataFrame:
     """

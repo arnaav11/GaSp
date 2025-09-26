@@ -7,7 +7,7 @@ from gauri_clienvalidity import run_client_assessment
     # 2. Import for output merging/saving
 from test_merge_arnav import generate_all_client_pdfs
 
-from pdf_to_csv_debug import convert_bank_statement_to_loan_dataframes
+from pdf_to_csv_debug import process_files
 # -----------------------------------------------------------------
 ## 1. Directory Setup and Imports
 # -----------------------------------------------------------------
@@ -35,8 +35,8 @@ def step_1_data_receiver(filepaths: list[str]) -> tuple[pd.DataFrame, pd.DataFra
     """
     print("\n[STEP 1/3] Data received and initialized.")
     # print(f"  -> Initialized {len(df_client_info)} client info records and {len(df_transactions)} transaction records.")
-    
-    return convert_bank_statement_to_loan_dataframes(filepaths[0])
+    print(f"  -> Processing file: {filepaths}")
+    return process_files(filepaths)
 
 def step_2_analyze(df_client_info: pd.DataFrame, df_transactions: pd.DataFrame) -> pd.DataFrame:
     """
@@ -45,6 +45,8 @@ def step_2_analyze(df_client_info: pd.DataFrame, df_transactions: pd.DataFrame) 
     """
     print("\n[STEP 2/3] Running client validity analysis...")
     print(f"  -> Analyzing {len(df_client_info)} clients with {len(df_transactions)} transactions...")
+    print(df_client_info.head())
+    print(df_transactions.head())
     df_results = run_client_assessment(df_client_info, df_transactions) 
     print("  -> Analysis complete.")
     return df_results
@@ -63,7 +65,7 @@ def step_3_save_output(df_results: pd.DataFrame, df_transactions: pd.DataFrame, 
 ## 3. The Streamlit Entry Point (Core Logic)
 # -----------------------------------------------------------------
 
-def run_gasp_pipeline(filepaths: list[str], output_path: str = 'output/gasp_client_report.csv') -> str:
+def run_gasp_pipeline(filepaths: list[str], output_path: str = 'output/') -> str:
     """
     The main callable function for your Streamlit application. 
     It runs the entire analysis using pre-loaded DataFrames.
