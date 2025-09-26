@@ -1,11 +1,14 @@
-# =========================
-# CLIENT ANALYSIS USING PRE-LOADED SENTIMENT MODEL
-# =========================
+# analyze_clients.py
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 
+# Import pre-loaded sentiment model + tokenizer
+from train_model_gauri import sentiment_model, tokenizer, max_length
 
+# -------------------------
+# 1. Load datasets
+# -------------------------
 f_debt = pd.read_csv('test/databases/all_debt_reports2.csv')
 df_profiles = pd.read_csv('test/databases/all_profiles2.csv')
 df_bank = pd.read_csv('test/databases/all_statements2.csv')
@@ -16,7 +19,9 @@ df_clients = pd.merge(df_clients, df_bank, on='client_id', how='left')
 df_clients.dropna(subset=['annual_income','loan_amount_requested',
                           'collateral_value','current_balance'], inplace=True)
 
-#---
+# -------------------------
+# 2. Fill numeric fields
+# -------------------------
 features = [
     'credit_score', 'annual_income', 'loan_amount_requested',
     'collateral_value', 'alimony_payments_monthly',
@@ -35,9 +40,9 @@ df_clients['loan_to_income'] = df_clients['loan_amount_requested'] / (df_clients
 df_clients['balance_to_collateral'] = df_clients['current_balance'] / (df_clients['collateral_value'] + 1)
 
 # -------------------------
-# 3. Define function using pre-loaded sentiment model & tokenizer
+# 3. Function to get sentiment score
 # -------------------------
-def get_sentiment_score(text, sentiment_model, tokenizer, max_length=40):
+def get_sentiment_score(text):
     if not isinstance(text, str) or text.strip() == "":
         return 0.5
     seq = tokenizer.texts_to_sequences([text])
@@ -58,10 +63,7 @@ with open("test/models/client_score_scaler.pickle", "rb") as handle:
 # 5. Compute sentiment score for all clients
 # -------------------------
 if 'description' in df_clients.columns:
-    # pass the pre-loaded sentiment_model and tokenizer
-    df_clients['sentiment_score'] = df_clients['description'].apply(
-        lambda x: get_sentiment_score(x, sentiment_model, tokenizer)
-    )
+    df_clients['sentiment_score'] = df_clients['description'].apply(get_sentiment_score)
 else:
     df_clients['sentiment_score'] = 0.5
 
