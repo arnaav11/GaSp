@@ -2,7 +2,7 @@
 # CLIENT ANALYSIS USING PRE-LOADED SENTIMENT MODEL
 # =========================
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import numpy as np
 import tensorflow as tf
 
 
