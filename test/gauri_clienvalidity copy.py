@@ -55,7 +55,7 @@ model = build_regression_model((X_train.shape[1],))
 model.compile(optimizer='adam', loss='mse', metrics=['mae'])
 model.summary()
 
-history = model.fit(X_train, y_train, validation_split=0.2, epochs=20, batch_size=64)
+# history = model.fit(X_train, y_train, validation_split=0.2, epochs=20, batch_size=64)
 
 # Save model and scaler
 model.save("sentiment_regressor.keras")
