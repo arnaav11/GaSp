@@ -1,13 +1,7 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import time
+import os
 from main import run_gasp_pipeline
-
-# --- Mock Helper Function to Create Simulated Transaction Data ---
-# Since the actual run_gasp_pipeline is not provided and is causing an error
-# by returning a string instead of a dictionary, we define a mock function
-# that returns the expected dictionary structure for Client 7 data.
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -15,7 +9,6 @@ st.set_page_config(
     page_icon="💸",
     layout="wide",
     initial_sidebar_state="expanded",
-    
 )
 
 # --- Inject custom CSS for a consistent Black, White, and Purple theme ---
@@ -50,11 +43,11 @@ st.markdown(
     }
     /* === SIDEBAR TOGGLE BUTTON HIDE (<< / >>) === */
     [data-testid="collapsedControl"] {
-    display: none !important;
+        display: none !important;
     }
     /* Horizontal Divider Line */
     hr {
-        background-color: #b19cd9;
+        background-color: #917cb9;
         height: 1px;
         border: none;
     }
@@ -64,7 +57,7 @@ st.markdown(
     /* =================================================================== */
     /* All Headers */
     h1, h2, h3, h4, h5, h6 {
-        color: #b19cd9; /* Light Purple Accent */
+        color: #917cb9; /* Light Purple Accent */
         font-style: normal;
     }
 
@@ -93,19 +86,19 @@ st.markdown(
         box-shadow: 0 4px 12px rgba(177, 156, 217, 0.1);
     }
     .main-header-container h1 {
-        color: #b19cd9;
+        color: #917cb9;
     }
 
     /* Info/Success/Warning/Error boxes */
     [data-testid="stInfo"], [data-testid="stSuccess"], [data-testid="stWarning"], [data-testid="stError"] {
         background-color: #121212;
-        border: 1px solid #b19cd9;
+        border: 1px solid #917cb9;
         border-radius: 10px;
         color: #FFFFFF;
     }
     /* Set icon color to purple for info boxes */
     [data-testid="stInfo"] .st-emotion-cache-1wivap2 {
-        color: #b19cd9;
+        color: #917cb9;
     }
 
     /* Metric Widget */
@@ -116,7 +109,7 @@ st.markdown(
         border-radius: 10px;
     }
     [data-testid="stMetricLabel"] {
-        color: #b19cd9; /* Purple label for metrics */
+        color: #917cb9; /* Purple label for metrics */
     }
     [data-testid="stMetricValue"], [data-testid="stMetricDelta"] {
         color: #FFFFFF; /* White value and delta */
@@ -126,7 +119,7 @@ st.markdown(
     input[type="number"] {
         background-color: #1e1e1e;
         color: #FFFFFF;
-        border: 1px solid #b19cd9;
+        border: 1px solid #917cb9;
         border-radius: 5px;
     }
     
@@ -136,7 +129,7 @@ st.markdown(
 
     /* Primary Buttons (in main content) */
     .stButton > button {
-        background-color: #b19cd9;
+        background-color: #917cb9;
         color: white;
         border-radius: 10px;
         padding: 10px 20px;
@@ -157,13 +150,13 @@ st.markdown(
     [data-testid="stSidebar"] .stButton button {
         width: 100%;
         margin-top: 10px;
-        border: 1px solid #b19cd9;
+        border: 1px solid #917cb9;
         background-color: transparent;
         color: #e0e0e0;
     }
     [data-testid="stSidebar"] .stButton button:hover {
         background-color: rgba(177, 156, 217, 0.1);
-        color: #b19cd9;
+        color: #917cb9;
         border-color: #c0b2d9;
     }
     [data-testid="stSidebar"] .stButton button:focus {
@@ -174,25 +167,25 @@ st.markdown(
     /* Main container for the file uploader (the "drag and drop" area) */
     [data-testid="stFileUploader"] {
         border-radius: 10px;
-        border: 2px dashed #b19cd9;     /* Purple dashed border */
-        background-color: #000000;      /* Black background */
+        border: 2px dashed #917cb9;     /* Purple dashed border */
+        background-color: #121212;      /* Dark background for the box */
         padding: 1rem;
     }
 
     /* The 'Browse files' button inside the uploader */
-    section[data-testid="stFileUploader"] button {
-        background-color: #000000 !important; /* Black background */
-        color: #000000 !important;            /* White text */
-        border: 1px solid #b19cd9 !important; /* Purple border */
+    [data-testid="stFileUploader"] button {
+        background-color: #917cb9 !important; /* Purple background */
+        color: #FFFFFF !important;            /* White text */
+        border: 1px solid #917cb9 !important; 
     }
 
     /* Text inside the uploader (e.g., 'Drag and drop file here') */
     [data-testid="stFileUploader"] span, [data-testid="stFileUploader"] p {
-        color: #000000 !important; /* White text */
+        color: #FFFFFF !important; /* White text */
     }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 # --- Initialize session state for page navigation ---
@@ -204,31 +197,47 @@ if 'pipeline_output' not in st.session_state:
     st.session_state.pipeline_output = None # Store the result dictionary here
 
 
-# --- Functions for navigation ---
+# --- Functions for navigation and logic ---
 def go_to_section(section_name):
     st.session_state.selected_section = section_name
 
 def start_assessment():
     st.session_state.assessment_initiated = True
+    
+    # Create a temporary directory for uploaded files if it doesn't exist
+    temp_dir = "temp_uploaded_files"
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+        
     all_uploaded_files = []
     file_keys = ['personal_docs', 'financial_docs', 'asset_docs', 'additional_docs']
     
-    # Collect all UploadedFile objects
+    # Collect all UploadedFile objects from session state
     for key in file_keys:
         files = st.session_state.get(key)
         if files and isinstance(files, list):
             all_uploaded_files.extend(files)
 
-    # Convert the list of UploadedFile objects into a list of file name strings (simulated paths)
-    # This is done to mock the behavior of file processing without needing the actual files
-    all_file_paths = [("" + f.name) for f in all_uploaded_files]
+    # Check if any files were uploaded
+    if not all_uploaded_files:
+        st.warning("Please upload at least one document before starting the assessment.")
+        st.session_state.assessment_initiated = False
+        return
 
-    # Store the output of the pipeline in session state
-    # Calling the mock function now
+    # Save uploaded files to the temporary directory and collect their paths
+    all_file_paths = []
+    for uploaded_file in all_uploaded_files:
+        file_path = os.path.join(temp_dir, uploaded_file.name)
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        all_file_paths.append(file_path)
+
+    # Run the backend pipeline with the file paths
     try:
-        st.session_state.pipeline_output = run_gasp_pipeline(all_file_paths)
+        with st.spinner('Running AI-powered assessment... This may take a moment.'):
+            st.session_state.pipeline_output = run_gasp_pipeline(all_file_paths)
     except Exception as e:
-        st.error(f"An error occurred during assessment simulation: {e}")
+        st.error(f"An error occurred during assessment: {e}")
         st.session_state.pipeline_output = None
         st.session_state.assessment_initiated = False
         return
@@ -240,7 +249,7 @@ def start_assessment():
 with st.sidebar:
     st.markdown(
         """
-        <div style="background-color: #b19cd9; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+        <div style="background-color: #917cb9; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
             <h2 style="color: black; margin: 0; font-family: 'Libre Baskerville', serif;">GA$P Navigation</h2>
         </div>
         """,
@@ -261,7 +270,6 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("_Ready to assess? Click the button below!_")
-    # This button uses the primary style defined in the CSS
     st.button("Start Comprehensive Assessment 🚀", key="btn_assess", on_click=start_assessment, use_container_width=True)
 
 # --- Main Content ---
@@ -285,20 +293,20 @@ st.markdown("---")
 # --- Content for Each Section ---
 if st.session_state.selected_section == "Client Documents":
     st.header("1. Client Portfolio & Document Submission")
-    st.markdown("_Securely upload the required documents for a thorough analysis. Our platform supports various file types and ensures data privacy and security. **Note:** Only the file path/name is used for simulation._")
+    st.markdown("_Securely upload the required documents for a thorough analysis. Our platform supports various file types and ensures data privacy and security._")
 
     col1, col2 = st.columns(2, gap="large")
     with col1:
         st.subheader("📂 Personal & Tax Forms")
         st.file_uploader(
-            "Upload client personal details, SSN, and tax forms (PDF, JPG, PNG)",
+            "Upload client personal details and tax forms (e.g., Loan_Profile.pdf)",
             type=["pdf", "jpg", "jpeg", "png"],
             accept_multiple_files=True,
             key="personal_docs"
         )
         st.subheader("🏦 Bank Statements & Financial Records")
         st.file_uploader(
-            "Upload bank statements and financial records (PDF, CSV)",
+            "Upload bank statements and financial records (e.g., Bank_Statement.pdf)",
             type=["pdf", "csv"],
             accept_multiple_files=True,
             key="financial_docs"
@@ -306,7 +314,7 @@ if st.session_state.selected_section == "Client Documents":
     with col2:
         st.subheader("💼 Asset & Debt Documentation")
         st.file_uploader(
-            "Upload proof of assets, collateral, and debt history (PDF, JPG, PNG)",
+            "Upload proof of assets, collateral, and debt history",
             type=["pdf", "jpg", "jpeg", "png"],
             accept_multiple_files=True,
             key="asset_docs"
@@ -326,50 +334,16 @@ elif st.session_state.selected_section == "Manual Data Entry":
     col3, col4, col5 = st.columns(3, gap="large")
     with col3:
         st.subheader("📊 Credit & Income")
-        st.number_input(
-            "Estimated Credit Score",
-            min_value=300,
-            max_value=850,
-            step=1,
-            help="A value between 300 and 850.",
-            key="credit_score"
-        )
-        st.number_input(
-            "Annual Salary ($)",
-            min_value=0,
-            step=1000,
-            key="annual_salary_manual" # Changed key to avoid conflict
-        )
+        st.number_input("Estimated Credit Score", min_value=300, max_value=850, step=1, help="A value between 300 and 850.", key="credit_score")
+        st.number_input("Annual Salary ($)", min_value=0, step=1000, key="annual_salary_manual")
     with col4:
         st.subheader("💰 Financial Standing")
-        st.number_input(
-            "Total Debts ($)",
-            min_value=0,
-            step=1000,
-            key="total_debts"
-        )
-        st.number_input(
-            "Total Assets ($)",
-            min_value=0,
-            step=1000,
-            key="total_assets"
-        )
+        st.number_input("Total Debts ($)", min_value=0, step=1000, key="total_debts")
+        st.number_input("Total Assets ($)", min_value=0, step=1000, key="total_assets")
     with col5:
         st.subheader("📈 Loan Details")
-        st.number_input(
-            "Investment/Loan Price ($)",
-            min_value=0,
-            step=1000,
-            key="investment_price"
-        )
-        st.number_input(
-            "Interest Rate (%)",
-            min_value=0.0,
-            max_value=100.0,
-            step=0.1,
-            format="%.2f",
-            key="interest_rate"
-        )
+        st.number_input("Investment/Loan Price ($)", min_value=0, step=1000, key="investment_price")
+        st.number_input("Interest Rate (%)", min_value=0.0, max_value=100.0, step=0.1, format="%.2f", key="interest_rate")
 
 elif st.session_state.selected_section == "AI Model Details":
     st.header("3. Key Data Points for AI Model")
@@ -377,13 +351,13 @@ elif st.session_state.selected_section == "AI Model Details":
     st.markdown("---")
     st.markdown(
         """
-        - <b><span style='color:#b19cd9;'>Credit History</span></b>: _Detailed analysis of payment history, credit utilization, and credit age._
-        - <b><span style='color:#b19cd9;'>Income & Employment</span></b>: _Verification of income stability, employment history, and salary trends._
-        - <b><span style='color:#b19cd9;'>Debt & Assets</span></b>: _A full evaluation of the debt-to-income ratio and asset-to-debt ratio._
-        - <b><span style='color:#b19cd9;'>Personal Information</span></b>: _Demographic and residential data for contextual analysis._
-        - <b><span style='color:#b19cd9;'>Loan Details</span></b>: _Specifics of existing and proposed loans, including interest rates and terms._
-        - <b><span style='color:#b19cd9;'>Transactional Data & Digital Footprint</span></b>: _Secure analysis of banking and online activity for behavioral patterns._
-        - <b><span style='color:#b19cd9;'>Sentiment Analysis from documents</i></b>: _AI-driven text analysis to gauge qualitative risk factors from provided documents._
+        - <b><span style='color:#917cb9;'>Credit History</span></b>: _Detailed analysis of payment history, credit utilization, and credit age._
+        - <b><span style='color:#917cb9;'>Income & Employment</span></b>: _Verification of income stability, employment history, and salary trends._
+        - <b><span style='color:#917cb9;'>Debt & Assets</span></b>: _A full evaluation of the debt-to-income ratio and asset-to-debt ratio._
+        - <b><span style='color:#917cb9;'>Personal Information</span></b>: _Demographic and residential data for contextual analysis._
+        - <b><span style='color:#917cb9;'>Loan Details</span></b>: _Specifics of existing and proposed loans, including interest rates and terms._
+        - <b><span style='color:#917cb9;'>Transactional Data & Digital Footprint</span></b>: _Secure analysis of banking and online activity for behavioral patterns._
+        - <b><span style='color:#917cb9;'>Sentiment Analysis from documents</i></b>: _AI-driven text analysis to gauge qualitative risk factors from provided documents._
         """,
         unsafe_allow_html=True
     )
@@ -394,16 +368,14 @@ elif st.session_state.selected_section == "Assessment Results":
     st.markdown("---")
 
     if st.session_state.assessment_initiated and st.session_state.pipeline_output:
-        # Get the actual, calculated data
         results = st.session_state.pipeline_output
         
-        # Check if results is a dictionary before proceeding
-        if isinstance(results, dict):
+        if "error" in results:
+            st.error(f"Assessment failed: {results['error']}")
+        elif isinstance(results, dict):
             st.success("Assessment complete! A detailed report has been generated below.")
 
-            # Display the pipeline result to confirm the files were processed
             st.subheader("Pipeline Status")
-            # Check if pipeline_summary exists and is a list before joining
             if 'pipeline_summary' in results and isinstance(results['pipeline_summary'], list):
                 st.code("\n".join(results['pipeline_summary']))
             else:
@@ -411,16 +383,9 @@ elif st.session_state.selected_section == "Assessment Results":
                 
             st.markdown("---") 
 
-            # --- DISPLAY RESULTS USING EXTRACTED/CALCULATED VALUES ---
-            
             st.subheader("Overall Risk Score")
-            # Using columns to create a visually appealing metric layout
             cols = st.columns(3)
-            
-            # Display the extracted credit score (685 for Client 7)
             cols[0].metric(label="Credit Risk Score", value=str(results.get('credit_score', 'N/A')))
-            
-            # Display the calculated Fraud and Viability based on the credit score
             cols[1].metric(label="Fraud Risk", value=results.get('fraud', 'N/A'))
             cols[2].metric(label="Investment Viability", value=results.get('viability', 'N/A'))
 
@@ -429,30 +394,24 @@ elif st.session_state.selected_section == "Assessment Results":
             
             col_metrics1, col_metrics2 = st.columns(2, gap="large")
             with col_metrics1:
-                # Display the calculated DTI based on the credit score
                 st.metric(label="Debt-to-Income Ratio", value=results.get('dti', 'N/A'), delta="-2%", delta_color="inverse", help="Lower is better.")
-                # Display the dynamically extracted Annual Salary
                 salary_value = results.get('annual_salary', 0)
                 st.metric(label="Annual Salary (Extracted)", value=f"${salary_value:,.0f}" if isinstance(salary_value, (int, float)) else str(salary_value), help="Extracted from uploaded documents.") 
             with col_metrics2:
-                # Display the total debit from the simulated transactions
                 debit_value = results.get('total_debit', 0)
-                st.metric(label="Simulated Total Debit", value=f"${debit_value:,.2f}" if isinstance(debit_value, (int, float)) else str(debit_value), help="Total debits calculated from transaction data.") 
+                st.metric(label="Total Debit (from Statement)", value=f"${debit_value:,.2f}" if isinstance(debit_value, (int, float)) else str(debit_value), help="Total debits calculated from transaction data.") 
                 st.metric(label="Projected Loan Approval", value=results.get('approval', 'N/A'), delta="Adjusted based on Credit Score") 
-                
 
             st.markdown("---")
             st.subheader("Visual Analysis")
             st.write("_A visual breakdown of the client's financial health, demonstrating key trends and areas of risk._")
-            # Placeholder image with a theme-matching URL
-            st.image("https://placehold.co/1000x500/000000/b19cd9?text=Portfolio+Breakdown+Chart+for+Client+7", use_column_width=True)
+            st.image("https://placehold.co/1000x500/000000/917cb9?text=Portfolio+Breakdown+Chart", use_container_width=True)
 
             st.markdown("---")
             st.subheader("AI-Generated Insights & Recommendations")
-            # Display the calculated insight based on the credit score
             st.info(results.get('insights', 'No insights generated.'))
         else:
-            st.error("Assessment failed: The pipeline did not return a valid result dictionary. Please check the `run_gasp_pipeline` function.")
+            st.error("Assessment failed: The pipeline did not return a valid result dictionary.")
 
     else:
-        st.info("Please click the 'Start Comprehensive Assessment' button in the sidebar to begin the analysis and view the results.")
+        st.info("Please upload your documents and click the 'Start Comprehensive Assessment' button in the sidebar to begin.")
