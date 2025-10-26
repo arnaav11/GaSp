@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-from pipeline import run_gasp_pipeline
+from test_code.pipeline import run_gasp_pipeline
 
 # --- Page Configuration ---
 st.set_page_config(
