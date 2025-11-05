@@ -405,7 +405,7 @@ elif st.session_state.selected_section == "Assessment Results":
             st.markdown("---")
             st.subheader("Visual Analysis")
             st.write("_A visual breakdown of the client's financial health, demonstrating key trends and areas of risk._")
-            st.image("https://placehold.co/1000x500/000000/917cb9?text=Portfolio+Breakdown+Chart", use_container_width=True)
+            st.image(results['chart_path'], use_container_width=True)
 
             st.markdown("---")
             st.subheader("AI-Generated Insights & Recommendations")
